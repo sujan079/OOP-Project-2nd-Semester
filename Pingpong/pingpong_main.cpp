@@ -230,7 +230,12 @@ int main()
     InitAudioDevice();
     SetTargetFPS(60); // this function will set the frame rate of the game to 60 frames per second
     // if we didn't set the frame rate the game will run as fast as the computer can handle
+     Rectangle button1 = { screenWidth/2 - 150, screenHeight/2 - 25, 150, 50 };//
+    Rectangle button2 = { screenWidth/2 + 50, screenHeight/2 - 25, 100, 50 };
 
+   
+    bool button1Clicked = false;
+    bool button2Clicked = false;
     ball.radius = 20;
     ball.x = screenWidth / 2;
     ball.y = screenHeight / 2;
@@ -251,9 +256,48 @@ int main()
 
     // loading of the sound
     Sound strike = LoadSound("resources/strike.wav");
-
+// this main game loop will run until the window is closed
     while (!WindowShouldClose())
     {
+        while (!WindowShouldClose()) 
+    {
+        // Update
+        if (CheckCollisionPointRec(GetMousePosition(), button1))
+        {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                button1Clicked = true;
+            }
+        }
+        else if (CheckCollisionPointRec(GetMousePosition(), button2))
+        {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                button2Clicked = true;
+            }
+        }
+
+        // Draw
+        BeginDrawing();
+
+            ClearBackground(SKYBLUE);
+
+            if (button1Clicked)
+               break;
+            else
+                DrawRectangleRec(button1, GRAY);   // Button1 color when not clicked
+
+            if (button2Clicked)
+            exit(0);
+            else
+                DrawRectangleRec(button2, GRAY);   // Button2 color when not clicked
+
+            DrawText("Single Player", button1.x + 10, button1.y + 15, 20, BLACK);
+            DrawText("Quit", button2.x + 10, button2.y + 15, 20, BLACK);
+
+        EndDrawing();
+    }
+
 
         while (!WindowShouldClose()) // this function will return true if the window is closed
 
@@ -268,6 +312,13 @@ int main()
 
             ClearBackground(mediumDarkBlue); // this function will clear the background of the canvas and set it to black
 
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                button2Clicked = true;
+            }
+          DrawRectangleRec(button2, GRAY);   // Button2 color when not clicked
+            DrawText("Quit", button2.x + 10, button2.y + 15, 20, BLACK);//
+
             // slide  and middle lines for the game interface
             DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, BLACK);  // x1 y1 x2 y2 color
             DrawLine(2, 2, screenWidth, 2, BLACK);                               // x1 y1 x2 y2 color
@@ -275,7 +326,7 @@ int main()
 
             DrawRectangle(screenWidth / 2, 0, 2, screenHeight, BLACK);   // x y width height color
             DrawRectangle(0, 0, screenWidth / 2, screenHeight, BLUE);    // x y width height color
-            DrawCircle(screenWidth / 2, screenHeight / 2, 150, SKYBLUE); // x y radius color
+            DrawCircle(screenWidth / 2, screenHeight / 2, 150, lightBlue); // x y radius color
             ball.move();
             // remember that the coordinate system in raylib starts from the top left corner of the screen updown :y side: x
             player.move();
