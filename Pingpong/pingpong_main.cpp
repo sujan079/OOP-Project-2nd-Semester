@@ -51,6 +51,20 @@ public:
             }
         }
     }
+    void move2(){
+        x += speed_x;
+        y += speed_y;
+
+        if (y + radius >= GetScreenHeight() || y - radius <= 0)
+        {                  // checking if the ball touch the bottom or top of the screen
+            speed_y *= -1; // changing the direction of the ball in y direction
+        }
+        if (x + radius >= GetScreenWidth() || x - radius <= 0)
+        {
+            speed_x *= -1;
+        }
+        
+    }
 
     void resetball()
     {
@@ -84,7 +98,7 @@ public:
 
     void Draw()
     {
-        DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, BLACK);
+        DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, WHITE);
     }
 
     void move()
@@ -99,6 +113,9 @@ public:
         }
 
         avoidObstruction();
+    }
+    void draw2(){
+        DrawRectangleRounded(Rectangle{x, y, width, height},0.8 ,0,BLACK);
     }
 };
 
@@ -192,8 +209,8 @@ public:
     }
 };
 
-Ball ball;
-Paddle player;
+Ball ball,ball2;
+Paddle player,paddle1,paddle2;
 AnimateBall aniball;
 
 cpuPaddle cpu;
@@ -242,6 +259,15 @@ int main()
     ball.speed_x = 7;
     ball.speed_y = 7;
 
+    ball2.radius = 20;
+    ball2.x = screenWidth / 2;
+    ball2.y = screenHeight / 2;
+    ball2.speed_x = 7;
+    ball2.speed_y = 7;
+
+
+
+
     player.width = 25;
     player.height = 120;
     player.x = screenWidth - player.width - 12;
@@ -252,7 +278,16 @@ int main()
     cpu.height = 120;
     cpu.x = 12;
     cpu.y = screenHeight / 2 - cpu.height / 2;
-    cpu.speed = 3;
+    cpu.speed = 7;
+
+    paddle1.width = 25;
+    paddle1.height = 120;
+    paddle1.x = screenWidth - paddle1.width - 12;
+    paddle1.y = screenHeight / 2 - paddle1.height / 2;
+    paddle2.width = 25;
+    paddle2.height = 120;
+    paddle2.x = 12;
+    paddle2.y = screenHeight / 2 - paddle2.height / 2;
 
     // loading of the sound
     Sound strike = LoadSound("resources/strike.wav");
@@ -281,6 +316,11 @@ int main()
         BeginDrawing();
 
             ClearBackground(SKYBLUE);
+             ball2.Draw();
+                     ball2.move2();
+                       paddle1.draw2();
+            paddle2.draw2();
+
 
             if (button1Clicked)
                break;
@@ -311,6 +351,7 @@ int main()
             BeginDrawing(); // this function creates a blankcanvas so that we can starting drawinng
 
             ClearBackground(mediumDarkBlue); // this function will clear the background of the canvas and set it to black
+           
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
@@ -331,7 +372,7 @@ int main()
             // remember that the coordinate system in raylib starts from the top left corner of the screen updown :y side: x
             player.move();
             cpu.move(ball.y);
-
+           
             // check for the colloision between the ball and the player
             if (CheckCollisionCircleRec(Vector2{ball.x, ball.y}, ball.radius, Rectangle{player.x, player.y, player.width, player.height}))
             {
