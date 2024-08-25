@@ -8,21 +8,62 @@
 Color lightBlue = Color{173, 216, 230, 255};    // Light Blue with full opacity
 Color mediumDarkBlue = Color{0, 102, 204, 255}; // Medium Dark Blue with full opacity
 Color lighterBlue = Color{192, 230, 242, 255};  // Slightly Lighter Blue with full opacity
+
+Color backgroundGradientTop = {30, 60, 114, 255};   // #1E3C72
+Color backgroundGradientBottom = {42, 82, 152, 255}; // #2A5298
+Color ballColor = {255, 69, 0, 255};                // #FF4500
+Color playerPaddleColor = {50, 205, 50, 255};       // #32CD32
+Color cpuPaddleColor = {220, 20, 60, 255};          // #DC143C
+Color netColor = WHITE;
+Color textColor = WHITE;
+Color textShadowColor = BLACK;
+Color highScoreColor = YELLOW;
+
+
 using namespace std;
 int player_score = 0;
 int cpu_score = 0;
+int player2_score = 0;
+
+class playgame
+{
+    public:
+    void singleplayer();
+    void twoplayer();
+};
+playgame obj;
 
 class Ball
 {
-public:
-    float x, y;
+      float x, y;
     int speed_x, speed_y;
-    int radius;
+    int radius=20;
+    int player1 ,player2,round;
+
+public:
+    Ball()
+    {
+        x = GetScreenWidth() / 2;
+        y = GetScreenHeight() / 2;
+        speed_x = 6;
+
+        speed_y = 6;
+    }
+    Ball(float a,float b){
+    x=a;
+    y=b;
+    speed_x=6;
+    speed_y=6;
+    
+}
 
     void Draw()
     {
-        DrawCircle(x, y, radius, WHITE);
+        DrawCircle(x, y, radius, YELLOW);
     }
+ 
+
+
 
     // function to move the ball
     void move()
@@ -34,12 +75,14 @@ public:
 
         if (y + radius >= GetScreenHeight() || y - radius <= 0)
         {                  // checking if the ball touch the bottom or top of the screen
-            speed_y *= -1; // changing the direction of the ball in y direction
+            speed_y *= -1.05; // changing the direction of the ball in y direction
 
             if (x + radius >= GetScreenWidth())
             {
                 PlaySound(lose);
                 cpu_score++; // computer wins
+                 player2++;
+         round++;
                 resetball();
             }
 
@@ -47,23 +90,44 @@ public:
             {
                 PlaySound(win);
                 player_score++;
+                 player2++;
+         round++;
                 resetball();
             }
         }
     }
-    void move2(){
-        x += speed_x;
-        y += speed_y;
+    void collision(){
+        speed_x *= -1;
 
-        if (y + radius >= GetScreenHeight() || y - radius <= 0)
-        {                  // checking if the ball touch the bottom or top of the screen
-            speed_y *= -1; // changing the direction of the ball in y direction
-        }
-        if (x + radius >= GetScreenWidth() || x - radius <= 0)
-        {
-            speed_x *= -1;
-        }
-        
+    }
+ 
+    float ballpy()
+    {
+        return y;
+    }
+    float ballpx()
+    {
+        return x;
+    }
+    float ballpr()
+    {
+        return radius;
+    }
+    int player(){
+        return player_score;
+    }
+    int cpu(){
+        return cpu_score;
+    }
+
+    int rounds(){
+        return round;
+    }
+    int player1r(){
+        return player1;
+    }
+    int player2r(){
+        return player2;
     }
 
     void resetball()
@@ -78,6 +142,9 @@ public:
 class Paddle
 {
 protected:
+  float x, y;
+    int speed;
+    float width, height;
     void avoidObstruction()
     {
 
@@ -92,9 +159,15 @@ protected:
     }
 
 public:
-    float x, y;
-    int speed;
-    float width, height;
+    Paddle (){}
+    Paddle(float a, float b,float w, float h)
+    {
+        x = a;
+        y = b;
+        speed = 6;
+        width = w;
+        height = h;
+    }
 
     void Draw()
     {
@@ -114,15 +187,108 @@ public:
 
         avoidObstruction();
     }
-    void draw2(){
-        DrawRectangleRounded(Rectangle{x, y, width, height},0.8 ,0,BLACK);
+    void draw2()
+    {
+        DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, GREEN);
     }
+    float getx()
+    {
+        return x;
+    }
+    float gety()
+    {
+        return y;
+    }
+    float getwidth()
+    {
+        return width;
+    }
+    float getheight()
+    {
+        return height;
+    }
+    int getspeed()
+    {
+        return speed;
+    }
+};
+
+class animation 
+{
+    private:
+     float x, y;
+    int speed_x=6, speed_y=6;
+    int radius=20;
+
+    public:
+    animation (){
+
+        x=50;
+        y=50;
+    }
+
+
+      void Draw()
+    {
+        DrawCircle(x, y, radius, WHITE);
+    }
+       void move2(){
+        x += speed_x;
+        y += speed_y;
+
+        if (y + radius >= GetScreenHeight() || y - radius <= 0)
+        {                  // checking if the ball touch the bottom or top of the screen
+            speed_y *= -1; // changing the direction of the ball in y direction
+        }
+        if (x + radius >= GetScreenWidth() || x-radius<=0)
+        {
+            speed_x *= -1;
+        }
+       }
+
+};
+animation frontball;
+
+class player3 :public Paddle{
+
+    public:
+    player3(){}
+    //using concept of constructor in single inheratance
+    player3(float a, float b,float w,float h) :Paddle (x,y,width,height){
+    
+    }
+
+     void move(){
+    if (IsKeyDown(KEY_W)){
+
+        y=y-speed;
+
+    }
+
+    if (IsKeyDown(KEY_S)){
+
+        y=y+speed;
+
+    }
+
+    avoidObstruction();
+   }
+
+    
 };
 
 class cpuPaddle : public Paddle
 {
 
 public:
+    cpuPaddle(float a, float b, float w, float h)
+    {
+        x = a;
+        y = b;
+        speed = 3;
+        width = w;
+        height = h;
+    }
     void move(int bally)
     {
         if (y + height / 2 < bally)
@@ -144,7 +310,13 @@ public:
         }
         avoidObstruction();
     }
+     void Draw()
+    {
+        DrawRectangleRounded(Rectangle{x, y, width, height}, 0.8, 0, cpuPaddleColor);
+    }
 };
+
+
 
 class AnimateBall
 { // Animation class
@@ -187,13 +359,13 @@ public:
 
             // Draw
             BeginDrawing();
-            ClearBackground(lightBlue);
+            ClearBackground(netColor);
 
             for (const auto &ball : balls)
             {
                 DrawCircleV(ball.position, ball.radius, ball.color);
             }
-            DrawText("Congratulations! You have gain the highscore", screenWidth / 6, screenHeight / 2, 45, BLACK); // text x y font size color
+            DrawText("Congratulations! You have gain the highscore", screenWidth / 6, screenHeight / 2, 45, highScoreColor); // text x y font size color
             DrawText(TextFormat("Previous record:%i", temhighscore), screenWidth / 6, 460, 45, BLACK);              // text x y font size color
             DrawText(TextFormat("New Record:%i", new_highscore), screenWidth / 6, 560, 45, BLACK);                  // text x y font size color
             DrawText("Press ENTER to continue ,ESC to exit the game", screenWidth / 6, 620, 30, BLACK);             // text x y font size color
@@ -207,22 +379,25 @@ public:
             }
         }
     }
+
+  
 };
-
-Ball ball,ball2;
-Paddle player,paddle1,paddle2;
-AnimateBall aniball;
-
-cpuPaddle cpu;
 
 int main()
 {
     cout << "Starting the game" << endl;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    const int screenWidth = 1200;
+    const int screenHeight = 700;
     int highscore, newcpu_score;
     int life = 2;
     int temhighscore = 0;
+    Ball ball,ball2(600,350);
+
+Paddle player(screenWidth-35,screenHeight/2-50,25,130);
+Paddle paddle1(10,screenHeight/2-50,25,130);
+Paddle paddle2(screenWidth-40,screenHeight/2-50,25,130);
+cpuPaddle cpu(10,screenHeight/2-50,25,130);
+AnimateBall aniball;
 
     fstream file("highscore.txt", ios::in | ios::out);
 
@@ -245,100 +420,91 @@ int main()
 
     InitWindow(screenWidth, screenHeight, "Ping Pong");
     InitAudioDevice();
-    SetTargetFPS(60); // this function will set the frame rate of the game to 60 frames per second
-    // if we didn't set the frame rate the game will run as fast as the computer can handle
-     Rectangle button1 = { screenWidth/2 - 150, screenHeight/2 - 25, 150, 50 };//
-    Rectangle button2 = { screenWidth/2 + 50, screenHeight/2 - 25, 100, 50 };
+    SetTargetFPS(60);/// this function will set the frame per second to 60
+     
 
-   
+                                                                                 
+    Rectangle button1 = {screenWidth / 2 - 150, screenHeight / 2 - 25, 150, 50}; 
+    Rectangle button2 = {screenWidth / 2 +200, screenHeight / 2 - 25, 100, 50};
+     Rectangle button3 = {screenWidth/2+30, screenHeight/2-25, 150, 50};
+
+
+       Font font = LoadFont("sujan.ttf");  // Load a custom font
+    Vector2 position = { 300.0f, 200.0f }; 
+    float fontSize = 40.0f;                       // Set the size of the font
+    float spacing = 2.0f;                         // Set the spacing between characte
+    float rotation = 0.0f;                        // Set the rotation of the text in degrees
+    Color tint = WHITE;  
+      float rotationSpeed = 0.5f; 
+
     bool button1Clicked = false;
     bool button2Clicked = false;
-    ball.radius = 20;
-    ball.x = screenWidth / 2;
-    ball.y = screenHeight / 2;
-    ball.speed_x = 7;
-    ball.speed_y = 7;
-
-    ball2.radius = 20;
-    ball2.x = screenWidth / 2;
-    ball2.y = screenHeight / 2;
-    ball2.speed_x = 7;
-    ball2.speed_y = 7;
-
-
-
-
-    player.width = 25;
-    player.height = 120;
-    player.x = screenWidth - player.width - 12;
-    player.y = screenHeight / 2 - player.height / 2;
-    player.speed = 6;
-
-    cpu.width = 25;
-    cpu.height = 120;
-    cpu.x = 12;
-    cpu.y = screenHeight / 2 - cpu.height / 2;
-    cpu.speed = 7;
-
-    paddle1.width = 25;
-    paddle1.height = 120;
-    paddle1.x = screenWidth - paddle1.width - 12;
-    paddle1.y = screenHeight / 2 - paddle1.height / 2;
-    paddle2.width = 25;
-    paddle2.height = 120;
-    paddle2.x = 12;
-    paddle2.y = screenHeight / 2 - paddle2.height / 2;
-
+    bool button3Clicked = false;
+   
     // loading of the sound
     Sound strike = LoadSound("resources/strike.wav");
-// this main game loop will run until the window is closed
+    // this main game loop will run until the window is closed
     while (!WindowShouldClose())
     {
-        while (!WindowShouldClose()) 
-    {
-        // Update
-        if (CheckCollisionPointRec(GetMousePosition(), button1))
+        while (!WindowShouldClose())
         {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            // Update
+            if (CheckCollisionPointRec(GetMousePosition(), button1))
             {
-                button1Clicked = true;
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    button1Clicked = true;
+                }
             }
-        }
-        else if (CheckCollisionPointRec(GetMousePosition(), button2))
-        {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            else if (CheckCollisionPointRec(GetMousePosition(), button2))
             {
-                button2Clicked = true;
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    button2Clicked = true;
+                }
             }
-        }
+            else if (CheckCollisionPointRec(GetMousePosition(), button3))
+            {
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    button3Clicked = true;
+                }
+            }
+     rotation += rotationSpeed;  // Increment rotation angle by rotation speed
 
-        // Draw
-        BeginDrawing();
+        // Reverse rotation direction at -45 and 45 degrees
+        if (rotation >= 20.0f || rotation <= -20.0f) rotationSpeed = -rotationSpeed;
 
-            ClearBackground(SKYBLUE);
-             ball2.Draw();
-                     ball2.move2();
-                       paddle1.draw2();
-            paddle2.draw2();
+            // Draw
+            BeginDrawing();
+
+            ClearBackground(BLACK);
+          frontball.Draw();
+          frontball.move2();
 
 
-            if (button1Clicked)
-               break;
+            if (button3Clicked)
+                break;
             else
-                DrawRectangleRec(button1, GRAY);   // Button1 color when not clicked
-
-            if (button2Clicked)
-            exit(0);
-            else
-                DrawRectangleRec(button2, GRAY);   // Button2 color when not clicked
+                DrawRectangleRec(button3, GRAY); // Button2 color when not clicked
 
             DrawText("Single Player", button1.x + 10, button1.y + 15, 20, BLACK);
+            DrawText("Single Player", screenWidth/4,screenHeight/5, 40, BLACK);
+
             DrawText("Quit", button2.x + 10, button2.y + 15, 20, BLACK);
+            DrawText("Multiplayer", button3.x + 10, button3.y + 15, 20, BLACK);
+DrawTextPro(font, "PIng POng!", position, (Vector2){0, 0}, rotation, fontSize, spacing, tint);
 
-        EndDrawing();
-    }
 
 
+            EndDrawing();
+
+
+              if (button1Clicked)
+                {
+                    player_score = 0;
+
+        
         while (!WindowShouldClose()) // this function will return true if the window is closed
 
         {
@@ -350,47 +516,42 @@ int main()
 
             BeginDrawing(); // this function creates a blankcanvas so that we can starting drawinng
 
-            ClearBackground(mediumDarkBlue); // this function will clear the background of the canvas and set it to black
-           
-
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            {
-                button2Clicked = true;
-            }
-          DrawRectangleRec(button2, GRAY);   // Button2 color when not clicked
-            DrawText("Quit", button2.x + 10, button2.y + 15, 20, BLACK);//
-
+            ClearBackground(backgroundGradientBottom); // this function will clear the background of the canvas and set it to black
             // slide  and middle lines for the game interface
             DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, BLACK);  // x1 y1 x2 y2 color
             DrawLine(2, 2, screenWidth, 2, BLACK);                               // x1 y1 x2 y2 color
             DrawLine(0, screenHeight - 2, screenWidth, screenHeight - 2, BLACK); // x1 y1 x2 y2 color
 
-            DrawRectangle(screenWidth / 2, 0, 2, screenHeight, BLACK);   // x y width height color
-            DrawRectangle(0, 0, screenWidth / 2, screenHeight, BLUE);    // x y width height color
-            DrawCircle(screenWidth / 2, screenHeight / 2, 150, lightBlue); // x y radius color
-            ball.move();
+            DrawRectangle(screenWidth / 2, 0, 2, screenHeight, BLACK);     // x y width height color
+            DrawRectangle(0, 0, screenWidth / 2, screenHeight, backgroundGradientTop);      // x y width height color
+            DrawCircle(screenWidth / 2, screenHeight / 2, 150, netColor); // x y radius color
+            
             // remember that the coordinate system in raylib starts from the top left corner of the screen updown :y side: x
-            player.move();
-            cpu.move(ball.y);
+        
            
+
+
             // check for the colloision between the ball and the player
-            if (CheckCollisionCircleRec(Vector2{ball.x, ball.y}, ball.radius, Rectangle{player.x, player.y, player.width, player.height}))
+            if (CheckCollisionCircleRec(Vector2{ball.ballpx(), ball.ballpy()}, ball.ballpr(), Rectangle{player.getx(), player.gety(), player.getwidth(), player.getheight()}))
             {
-                ball.speed_x *= -1;
+                ball.collision();
                 PlaySound(strike);
             }
-            if (CheckCollisionCircleRec(Vector2{ball.x, ball.y}, ball.radius, Rectangle{cpu.x, cpu.y, cpu.width, cpu.height}))
+            if (CheckCollisionCircleRec(Vector2{ball.ballpx(), ball.ballpy()}, ball.ballpr(), Rectangle{cpu.getx(), cpu.gety(), cpu.getwidth(), cpu.getheight()}))
             {
-                ball.speed_x *= -1;
+                ball.collision();
                 PlaySound(strike);
             }
 
             ball.Draw();
+            ball.move();
             player.Draw();
+                player.move();
             cpu.Draw();
-            DrawText(TextFormat("YOU:%i", player_score), 900, 20, 50, BLACK); // text x y font size color
-            DrawText(TextFormat("CPU"), 300, 20, 50, BLACK); // text x y font size color
-            DrawText(TextFormat("Enter ESC key to exit at any time"), 5, 5,20, BLACK); // text x y font size color
+             cpu.move(ball.ballpy());
+            DrawText("CPU", 300, 20, 50, WHITE);                            // text x y font size color
+            DrawText(TextFormat("Player:%i", player_score),3*screenWidth/4-200,20,50,WHITE); // text x y font size color
+            DrawText(TextFormat("Enter ESC key to exit at any time"), 5, 5, 20, BLACK); // text x y font size color
 
             DrawText(TextFormat("HighScore:%i", highscore), screenWidth - 190, 20, 30, BLACK); // text x y font size color
             if (newcpu_score != cpu_score)
@@ -425,7 +586,7 @@ int main()
         while (!WindowShouldClose())
         {
             BeginDrawing();
-            ClearBackground(lightBlue);
+            ClearBackground(backgroundGradientTop);
             if (player_score > temhighscore)
             {
                 aniball.animation(temhighscore, highscore, player_score, life);
@@ -435,8 +596,8 @@ int main()
             }
             else
             {
-                DrawText("Game Over ", screenWidth / 6, screenHeight / 2, 60, BLACK);
-                DrawText(TextFormat("Your Score: %i", player_score), screenWidth / 6, 500, 60, BLACK);
+                DrawText("Game Over ", screenWidth / 6, screenHeight / 2, 60, highScoreColor);
+                DrawText(TextFormat("Your Score: %i", player_score), screenWidth / 6, 500, 60, textColor);
                 DrawText("Press ENTER to play ESC to exit", screenWidth / 6, 600, 40, BLACK);
                 EndDrawing();
                 if (IsKeyPressed(KEY_ENTER))
@@ -447,10 +608,21 @@ int main()
                 }
             }
         }
+        
     }
+     else{
+                DrawRectangleRec(button1, GRAY); // Button1 color when not clicked
+     }
+     if (button2Clicked)
+                break; 
+                 else{
+                DrawRectangleRec(button2, GRAY); // Button2 color when not clicked   
+                 }  
+                }
     CloseAudioDevice();
 
     CloseWindow();
 
     return 0;
+}
 }
